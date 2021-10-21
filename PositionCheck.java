@@ -1,7 +1,4 @@
-import lux.Cell;
-import lux.CityTile;
-import lux.Direction;
-import lux.Unit;
+import lux.*;
 
 import java.util.ArrayList;
 
@@ -15,6 +12,28 @@ public class PositionCheck {
 
     public PositionCheck() {
 
+    }
+
+    public CityTile getCloseCity(Player player, PositionCheck ps, Unit unit) {
+
+        if (player.cities.size() > 0) {
+
+            City city = player.cities.values().iterator().next();
+
+            ps.setClosestDist(999999);
+            ps.setClosestCityTile(null);
+
+            for (CityTile citytile : city.citytiles) {
+
+                double dist = citytile.pos.distanceTo(unit.pos);
+                if (dist < ps.getClosestDist()) {
+                    ps.setClosestCityTile(citytile);
+                    ps.setClosestDist(dist);
+                }
+            }
+        }
+
+        return ps.getClosestCityTile();
     }
 
     public Cell getClosestResourceTile() {

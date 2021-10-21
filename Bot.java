@@ -1,4 +1,7 @@
+import java.sql.Array;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 import lux.*;
@@ -22,73 +25,21 @@ public class Bot {
       GameMap gameMap = gameState.map;
 
       map map = new map();
-
+      //generate all resources on the map
       map.generateResources(gameMap);
 
+      //construct new classes
       PositionCheck ps = new PositionCheck();
       Resource rs = new Resource();
+      Worker wk = new Worker();
+
 
       // we iterate over all our units and do something with them
-      for (int i = 0; i < player.units.size(); i++) {
-        Unit unit = player.units.get(i);
-        if (unit.isWorker() && unit.canAct()) {
-          if (unit.getCargoSpaceLeft() > 0) {
-            // if the unit is a worker and we have space in cargo, lets find the nearest resource tile and try to mine it
-            Cell closestResourceTile = null;
-            double closestDist = 9999999;
-
-            
-
-            for (Cell cell : map.getResourceTiles()) {
-
-              if (cell.resource.type.equals(GameConstants.RESOURCE_TYPES.COAL) && !player.researchedCoal()) continue;
-              if (cell.resource.type.equals(GameConstants.RESOURCE_TYPES.URANIUM) && !player.researchedUranium()) continue;
-
-              double dist = cell.pos.distanceTo(unit.pos);
-              if (dist < closestDist) {
-                closestDist = dist;
-                closestResourceTile = cell;
-              }
-            }
-
-            if (closestResourceTile != null) {
-              Direction dir = unit.pos.directionTo(closestResourceTile.pos);
-              // move the unit in the direction towards the closest resource tile's position.
-              actions.add(unit.move(dir));
-            }
-          } else {
-            // if unit is a worker and there is no cargo space left, and we have cities, lets return to them
-            if (player.cities.size() > 0) {
-              City city = player.cities.values().iterator().next();
-
-              ps.setClosestDist(999999);
-              ps.setClosestCityTile(null);
-
-
-              for (CityTile citytile : city.citytiles) {
-                double dist = citytile.pos.distanceTo(unit.pos);
-
-                if (dist < ps.getClosestDist()) {
-                  ps.setClosestCityTile(citytile);
-                  ps.setClosestDist(dist);
-                }
-
-              }
-
-              if (ps.getClosestCityTile() != null) {
-
-                Direction dir = unit.pos.directionTo(ps.getClosestCityTile().pos);
-                actions.add(unit.move(dir));
-
-              }
-            }
-          }
-        }
-      }
+      wk.workerLogic(player, map, ps, rs, actions, gameState);
 
 
       // you can add debug annotations using the static methods of the Annotate class.
-      // actions.add(Annotate.circle(0, 0));
+      //actions.add(Annotate.circle(0, 0));
 
       /** AI Code Goes Above! **/
 
